@@ -5,6 +5,7 @@
 all:
   hosts:
 
+    # RELEASE_BLOCKER
     # Fedora
     valoo:
       expected_hostname: valoo

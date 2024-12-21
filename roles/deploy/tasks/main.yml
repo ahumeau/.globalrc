@@ -54,25 +54,6 @@
     state: directory
     dest: "{{ remote_directory }}/local_bin"
 
-# # NB: Nothing is done to remove executables added by previous versions or by the user
-# - name: Download programs in local_bin directory
-#   get_url:
-#     url:  "{{ item }}"
-#     dest: "{{ remote_directory }}/local_bin/"
-#     mode: 0755
-#   with_items:
-#     - https://path/to/some/bin
-
-- name: TOMBSTONE - remove previously manually downloaded difftastic
-  file:
-    path: "{{ remote_directory }}/local_bin/difft"
-    state: absent
-
-# TODO : cleanup task, remove eventually
-- name: Remove manually-installed prettyping
-  file:
-    path: "{{ remote_directory }}/local_bin/prettyping"
-    state: absent
 
 - name: Setup the loading via .bashrc
   blockinfile:
@@ -91,17 +72,8 @@
     name:   "{{ ansible_user_id }}"
     shell:  /bin/zsh
   become:   true
-  when:     have_root | bool
-
-  # TODO : Do this with an include
-- name: Load IRB configuration
-  blockinfile:
-    dest:   "{{ ansible_user_dir }}/.irbrc"
-    create: true
-    marker: "# {mark} GLOBALRC ANSIBLE MANAGED BLOCK"
-    block:  |
-      IRB.conf[:SAVE_HISTORY] = 200
-      IRB.conf[:HISTORY_FILE] = '~/.irb-history'
+  # zsh is the default shell on MacOS (since 10.15)
+  when:     have_root | bool and ansible_system != "Darwin"
 
 - name: Install desktop-specific stuff (common)
   import_tasks: desktop_common.yml
@@ -122,28 +94,6 @@
   import_tasks: zsh.yml
   tags: zsh
 
-- name: Install vim configuration
-  import_tasks: vim.yml
-  tags: vim
-
 - name: Install ssh configuration
   import_tasks: ssh.yml
   tags: ssh
-
-- name: Load screen configuration
-  blockinfile:
-    dest:         "{{ ansible_user_dir }}/.screenrc"
-    insertbefore: BOF
-    create:       true
-    marker:       "# {mark} GLOBALRC ANSIBLE MANAGED BLOCK"
-    block:  |
-      # Loading global screen configuration
-      source {{ remote_directory }}/files/screenrc
-
-# Mass-renaming tool with vim
-- name: Download vimv
-  get_url:
-    url:  https://raw.githubusercontent.com/thameera/vimv/master/vimv
-    dest: "{{ remote_directory }}/"
-    mode: 0755
-  tags: online

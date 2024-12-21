@@ -1,48 +1,4 @@
 
-- name: Install zsh and usual tools (RedHat)
-  dnf:
-    name:
-      - zsh
-      - git
-      # TODO: If we're on a desktop, install vim with clipboard support (vimx ?)
-      - vim
-      - screen
-      - tmux
-      - most
-      - mosh
-      - curl
-      - eza
-      - prettyping
-      - git-delta
-
-      # Language-specific package managers and tooling
-      - cargo         # rust deps with cargo
-
-  become: true
-  when: have_root and ansible_os_family == "RedHat"
-
-- name: install zsh and usual tools (Archlinux)
-  pacman:
-    name:
-      - zsh
-      - git
-      # TODO: if we're on a desktop, install vim with clipboard support (vimx ?)
-      - vim
-      - screen
-      - tmux
-      - most
-      - mosh
-      - curl
-      - eza
-      - prettyping
-      - git-delta
-
-      # Language-specific package managers and tooling
-      - cargo         # rust deps with cargo
-
-  become: true
-  when: have_root and ansible_os_family == "Archlinux"
-
 - name: Install zsh and usual tools (Debian)
   apt:
     update_cache:     true
@@ -50,15 +6,11 @@
     name:
       - zsh
       - git
-      # TODO: If we're on a desktop, install vim with clipboard support (vim-gui-common)
       - vim
-      - screen
       - tmux
       - most
-      - mosh
       - curl
       - eza
-      - prettyping
       - git-delta
 
       # Language-specific package managers and tooling
@@ -66,14 +18,14 @@
 
   when: have_root and ansible_os_family == 'Debian'
 
+# RELEASE_BLOCKER move macos packages install here
+
 - name: Install (compile) rust programs with cargo
   community.general.cargo:
     name:
       # There's a deb package downloadable from the github releases
       # There is no RPM yet (https://github.com/ellie/atuin/issues/990)
       # As of 2024-06-12, v18.3 does not compile, pin it for now.
-      # TODO : switch to installing with home-manager
       - atuin
     state: present
     version: "18.2.0"
-

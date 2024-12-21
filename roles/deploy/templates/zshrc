@@ -12,19 +12,13 @@
 # cf https://unix.stackexchange.com/questions/12107/how-to-unfreeze-after-accidentally-pressing-ctrl-s-in-a-terminal
 stty -ixon
 
-# Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
-# Initialization code that may require console input (password prompts, [y/n]
-# confirmations, etc.) must go above this block; everything else should go below.
-if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
-  source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
-fi
 
 ### end VERY early initialization
 
 # Places you into current directory
 pushd $(dirname $0) > /dev/null
 
-# Loading common components
+# Loading common components RELEASE_BLOCKER only zsh compat?
 source bazshrc.sh
 
 # Expand fpath to include custom functions
@@ -143,40 +137,6 @@ zstyle ':completion:*:hosts' hosts $hosts
 
 ### End completion pre-configuration ###
 
-
-
-### Begin custom stuff ###
-
-# IRC-client-like input, to store in history a partial command
-# cf http://www.zshwiki.org/home/zle/ircclientlikeinput
-# /!\ This probably won't work if done after other widget
-# changes affecting down-line-or-history
-
-fake-accept-line() {
-  if [[ -n "$BUFFER" ]];
-  then
-    print -S "$BUFFER"
-  fi
-  return 0
-}
-zle -N fake-accept-line
-
-down-or-fake-accept-line() {
-  if (( HISTNO == HISTCMD )) && [[ "$RBUFFER" != *$'\n'* ]];
-  then
-    zle fake-accept-line
-  fi
-  zle .down-line-or-history "$@"
-}
-zle -N down-line-or-history down-or-fake-accept-line
-
-# Just use G to pipe to grep
-# NB: this only expands in the case of space-separated G alone
-# See alias, in `man zshbuiltins`
-alias -g G='| grep'
-
-### End custom stuff ###
-
 ###############################################################################
 # Plugins pre-configuration                                                   #
 ###############################################################################
@@ -187,17 +147,6 @@ alias -g G='| grep'
 # Choose enabled highlighters
 ZSH_HIGHLIGHT_HIGHLIGHTERS=(main brackets)
 
-### powerlevel10k ###
-
-# https://starship.rs/ might be an alternative later on, it does have some pretty nice features :
-# * Simpler configuration
-# * Possibly crazy fast
-# But for now, it is entirely synchronous, and at least git status may be pretty slow :
-# https://github.com/starship/starship/issues/301
-
-# file generated with `p10k configure`
-source p10k.zsh
-
 ###############################################################################
 
 ### List of plugins ###
@@ -207,16 +156,6 @@ source "{{ remote_directory }}/zsh_plugins/zsh-autosuggestions/zsh-autosuggestio
 
 # Community packaging of completions for common programs
 fpath=({{ remote_directory }}/zsh_plugins/zsh-completions/src $fpath)
-
-# We both need 256 colors support, and a patched font, for p10k to work normally
-# TODO : the detection logic for the vscode case is probably quite brittle. It seems to work for now, though.
-if [[ -n $GLOBALRC_256_COLORS && (-n $GLOBALRC_PATCHED_FONT || $TERM_PROGRAM == "vscode") ]]; then
-  # Powerlevel10k, prompt configuration
-  source "{{ remote_directory }}/zsh_plugins/powerlevel10k/powerlevel10k.zsh-theme"
-else
-  # Just load legacy prompt
-  source zsh_prompt.zsh
-fi
 
 autoload -Uz compinit
 if [[ ${UID} -eq 0 ]] && [[ -n ${SUDO_USER} ]]; then
@@ -280,10 +219,9 @@ ZSH_HIGHLIGHT_STYLES+=(
 )
 
 ### zsh-autosuggestions ###
-ZSH_AUTOSUGGEST_USE_ASYNC=1         # fetch suggestions asynchronously (only required for zsh < 5.0.8, default afterwards)
 ZSH_AUTOSUGGEST_BUFFER_MAX_SIZE=200 # Disable suggestions past a certain command length
 
-# We're not savages so we manually bind the wigets once, at initialization, instead of at every single precmd
+# We're not savages so we manually bind the widgets once, at initialization, instead of at every single precmd
 # This MUST be executed after all other zle widget initializations
 # zsh-autosuggest creates a precmd (_zsh_autosuggest_start) that, which, by default, will re-wrap every zle widget (_zsh_autosuggest_bind_widgets)
 # at EVERY precmd. We're not savages, so we disable this. Instead, it will only run it at the very first precmd, then unregister itself.
@@ -298,11 +236,9 @@ ZSH_AUTOSUGGEST_MANUAL_REBIND=1
 
 ### Start key mappings ###
 
-# Switch to vi keymaps
-bindkey -v
 
 # Key mappings common to several keymaps
-keymap_list=('viins' 'vicmd' 'visual')
+# keymap_list=('viins' 'vicmd' 'visual')
 
 # # Mappings obsoleted by having an awesome keyboard
 #
@@ -323,7 +259,7 @@ keymap_list=('viins' 'vicmd' 'visual')
 
 # History backwards search (supports globbing)
 # TODO : probably made obsolete by atuin
-bindkey '^[g' history-incremental-pattern-search-backward
+# bindkey '^[g' history-incremental-pattern-search-backward
 
 # Explicit atuin key bindings
 bindkey '^r' _atuin_search_widget
@@ -348,30 +284,6 @@ complete -o nospace -C /usr/bin/packer packer
 complete -C '/usr/local/bin/aws_completer' aws
 
 ### End extra manual completions
-
-### Begin lazy loaded modules and completions ###
-
-# We lazy-load these because they take WAY too long to load otherwise.
-# See https://blog.jonlu.ca/posts/speeding-up-zsh and all the links at the bottom of the post
-
-# NB : We migrated from nvm to Volta, which uses a shim approach, and therefore doesn't need any setup at shell startup time (besides modifying $PATH)
-#
-# # Lazily load nvm and its completion if installed
-# # NB : This unloads nvm when re-sourcing .zshrc. Don't care.
-# # It is possible to load it even on commands such as npm, grunt, etc...
-# # with https://github.com/robbyrussell/oh-my-zsh/issues/5327#issuecomment-386480914
-# # TODO : switch to a zsh_fpath file ?
-# export NVM_DIR="$HOME/.nvm"
-# if [[ -d $NVM_DIR ]]; then
-#   nvm() {
-#     echo "GLOBALRC : Loading nvm..."
-#     source "$NVM_DIR/nvm.sh"  # This loads nvm
-#     source "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
-#     nvm $@ # Execute the newly defined nvm
-#   }
-# fi
-
-### End lazy loaded modules and completions ###
 
 # Comes back into previous directory
 popd > /dev/null

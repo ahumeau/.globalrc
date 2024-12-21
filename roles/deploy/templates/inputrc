@@ -2,8 +2,8 @@
 # It is apparently not always included by default
 $include /etc/inputrc
 
-# want vi to be the default edition mode for readline
-set editing-mode vi
+# want emacs to be the default edition mode for readline
+set editing-mode emacs
 
 # For explanation on the different keymaps, see :
 # https://superuser.com/questions/286781/readline-difference-between-vi-vi-move-vi-command-vi-insert-keymaps
@@ -20,7 +20,7 @@ set editing-mode vi
 # "{{ key_rh_right }}": forward-char
 # # Map Alt-space to exit insert mode
 # " ":                  vi-movement-mode
-# 
+#
 # # Command mode
 # set keymap vi-command
 # "{{ key_rh_left  }}": backward-char

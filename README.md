@@ -27,17 +27,11 @@ Previously partially supported :
 
 ## Deployment instructions
 
-There's currently a mix of ansible-managed stuff, and home-manager-managed stuff
-
 ### Ansible
 
 * If you're not me, you're gonna have to at least change the inventory.yml file, and probably quite a bit in host_vars/group_vars
 * Install ansible, likely the latest version with your OS package manager should be fine
 * `ansible-playbook deploy.yml`
-
-### home-manager
-
-* [Install nix](https://nixos.org/download/)
-  * NB : As of 2024-05-01, it's not possible to install nix as multi-user on SELinux-enabled distros, so, we settle with a single-user install for now
-* Install home-manager as a standalone program : https://nix-community.github.io/home-manager/#sec-install-standalone
-* Symlink the home-manager configuration file : `ln -s $PWD/home.nix $HOME/.config/home-manager/home.nix`
+* RELEASE_BLOCKER where to clone the repo (since one of the first steps is to copy its content to ~/.globalrc)
+* RELEASE_BLOCKER document ansible_hostname
+* RELEASE_BLOCKER document have_root

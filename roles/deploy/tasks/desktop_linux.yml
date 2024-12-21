@@ -1,134 +1,25 @@
 ### Package manager ###
 
-- name: Install graphical packages (RedHat)
-  dnf:
-    name:
-      # sway/wayland related
-      - sway                  # Tiling window manager
-      - swaylock              # trigger wayland lockscreen
-      - rofi                  # Program launcher
-      - rofimoji              # Emoji picker
-      - flameshot             # Screenshot tool
-      - swappy                # Edit screenshot
-      - wl-clipboard          # Interact with wayland clipboard (includes wl-copy)
-      - waybar                # Nice-looking bar
-      - fontawesome-fonts     # Font for waybar icons
-      - playerctl             # Command currently running player from the CLI / sway keybindings
-      - playerctl-libs        # used by the mediaplayer.py script, to display currently playing content
-      - xeyes                 # xeyes allows to know easily if a program is running through XWayland or not
-      - wtype                 # input text as if typed from the user, wayland equivalent of xdotool
-      - mako                  # Notification daemon
-      - wdisplays             # Graphical tool for monitors setup
-      - alacritty             # GPU-based terminal emulator
-      - lxpolkit              # polkit daemon
-      - blueman               # basic out-of-the-box bluetooth config
-      - kanshi                # auto-load correct desktop layout based on which monitors are plugged in
-      - neovim                # used in vscodium through an extension
-      - darkman               # light/dark theme runtime switching
-      - brightnessctl         # control screen brightness
-      - xwaylandvideobridge   # work around broken screensharing on low-quality apps (see sway config file)
-      - pavucontrol           # gui for pulseaudio configuration
-      - pulseaudio-utils      # provides pactl cli
-
-      # Language-specific package managers and tooling
-      - python3-pip       # python deps with pip
-      - rbenv             # ruby development environment
-      - ruby-build-rbenv  # allows rbenv to build ruby if required
-
-      # graphical theme
-      # Looks now already installed
-      # - adwaita-qt
-
-      # nmtui is a terminal graphical interface to NetworkManager
-      # TODO : Find the equivalent debian and arch packages (seems installed by default on Ubuntu and Manjaro)
-      - NetworkManager-tui
-
-  become: true
-  when: have_root and ansible_os_family == "RedHat"
-
-- name: Install graphical packages (Archlinux)
-  pacman:
-    name:
-      # sway/wayland related
-      - sway
-      - swaylock
-      - rofi
-      - rofimoji
-      - flameshot
-      - wl-clipboard
-      - waybar
-      - otf-font-awesome
-      - playerctl
-      # - playerctl-libs # TODO
-      - xorg-xeyes
-      - xorg-xwayland # NB : not installed by default on arch
-      - wtype
-      - mako
-      - wdisplays
-      - lxpolkit
-      - blueman
-      - kanshi
-      - neovim
-      - darkman
-      - brightnessctl
-      - pavucontrol
-      - pulseaudio-utils
-
-      # alacritty
-      - alacritty
-
-      # graphical theme
-      # - adwaita-qt #TODO
-
-  become: true
-  when: have_root and ansible_os_family == "Archlinux"
-
 - name: Install graphical packages (Debian)
   apt:
     cache_valid_time: 86400 # 1 day
     name:
       # sway/wayland related
-      - sway
-      - swaylock
       - rofi
       - flameshot
-      - wl-clipboard
-      - waybar
-      - fonts-font-awesome
-      - playerctl
-      - gir1.2-playerctl-2.0  # for mediaplayer.py
-      - x11-apps              # Contains xeyes
-      - wtype
-      - mako
-      - wdisplays
-      - lxpolkit
-      - blueman
-      - kanshi
-      - neovim
-      - darkman
-      - brightnessctl
-      - pavucontrol
-      - pulseaudio-utils
-
-      # alacritty
-      # TODO : there isn't an official deb package for now, only a ppa. See what we can do.
-
-      # graphical theme
-      - adwaita-qt
 
   become: true
   when: have_root and ansible_os_family == "Debian"
 
+# RELEASE_BLOCKER do we need to setup flatpak first
 - name: Install flatpak packages
   flatpak:
     name:
-      - com.discordapp.Discord
       # NB : the latest slack has broken screensharing, see sway config for details
       - com.slack.Slack
       - com.spotify.Client
-      - com.github.dynobo.normcap # OCR screen capture
-  # NB : We'll probably want to use them on other distros too, but it probably requires setting up flatpak first
-  when: ansible_os_family == "RedHat"
+      # RELEASE_BLOCKER 1password (check if other flatpaks are installed)
+  when: ansible_os_family == "Debian"
 
 ### Locale ###
 
@@ -182,36 +73,7 @@
 # I've given up, just change it with gnome-control-center
 #
 # These changes require at least logging out, but you might as well reboot at every step, honestly.
-
-### Enable bluetooth experimental features ###
-
-# Based on : https://askubuntu.com/a/1420501/627836
-# We used to need to enable bluez experimental features for headphones battery charge level retriveal, it's not needed anymore as of 2024-07-09
-# We keep the configuration as reference, it could still be useful.
-# - name: Enable bluez experimental features
-#   blockinfile:
-#     dest: /etc/bluetooth/main.conf
-#     insertbefore: BOF
-#     create: false
-#     marker: "# {mark} GLOBALRC ANSIBLE MANAGED BLOCK"
-#     block:  |
-#       # Globalrc-managed configuration
-# 
-#       [General]
-#       Experimental = true
-#   become: true
-#   when: have_root | bool
-#   notify: Restart bluez
-
-- name: TOMBSTONE - Don't enable bluez experimental features anymore
-  blockinfile:
-    dest: /etc/bluetooth/main.conf
-    marker: "# {mark} GLOBALRC ANSIBLE MANAGED BLOCK"
-    state: absent
-  become: true
-  when: have_root | bool
-  notify: Restart bluez
-
+# RELEASE_BLOCKER where is the locale actually set?
 ### Keyboard layouts ###
 
 - name: Install lxml with pip3
@@ -221,11 +83,6 @@
   become: true
   when: have_root | bool
 
-- name: Install lafayette keyboard layout
-  script: "{{ remote_directory }}/files/keyboards/lafayette_linux_v0.6.1.py"
-  changed_when: false
-  become: true
-  when: have_root | bool
 
 # Maybe for debian, configuring this through debconf would be cleaner
 # However I tried, and it was very annoying :
@@ -272,12 +129,6 @@
   when: have_root | bool
   changed_when: false # Sadly, we can't detect changes with command return
 
-- name: Configure X keyboard layout to lafayette
-  command: "localectl --no-convert set-x11-keymap {{ keyboard_layout }} '' {{ keyboard_variant }}"
-  become: true
-  when: have_root | bool
-  changed_when: false # Sadly, we can't detect changes with command return
-
 - name: Get new keyboard layout configuration
   command: "localectl status"
   become: true
@@ -286,19 +137,6 @@
   register: keyboard_layout_after
   notify: keyboard_config
 
-### Alacritty ###
-
-- name: TOMBSTONE - Remove old alacritty yaml config file
-  file:
-    path:   "{{ ansible_user_dir }}/.config/alacritty.yml"
-    state:  absent
-
-- name: Load alacritty config via .config/alacritty.toml
-  file:
-    state:  link
-    follow: false
-    src:    "{{ remote_directory }}/files/alacritty.toml"
-    dest:   "{{ ansible_user_dir }}/.config/alacritty.toml"
 
 ### Mako ###
 
@@ -315,78 +153,6 @@
     follow: false
     src:    "{{ remote_directory }}/files/mako_config"
     dest:   "{{ ansible_user_dir }}/.config/mako/config"
-
-### Graphical environment theming and configuration ###
-
-# See : https://www.reddit.com/r/archlinux/comments/2eo3qq/is_it_possible_to_get_qt_to_properly_use_gtk/
-# See : https://wiki.archlinux.org/index.php/Uniform_look_for_Qt_and_GTK_applications#Using_a_GTK.2B_icon_theme_in_Qt_apps
-# The solution chosen here for consistent look between Qt and GTK applications is to use a same theme implemented
-# in both native formats
-
-# TODO : Candidates for deletion, I don't think I use any software with such old versions
-# of GTK or Qt. Kept here for now, just in case.
-# Don't forget to delete the corresponding files too
-#
-# - name: Load GTK2 configuration via .gtkrc-2.0
-#   blockinfile:
-#     dest:   "{{ ansible_user_dir }}/.gtkrc-2.0"
-#     create: true
-#     marker: "# {mark} GLOBALRC ANSIBLE MANAGED BLOCK"
-#     block:  |
-#       # Load GTK2 configuration
-#       include "{{ remote_directory }}/files/gtkrc-2.0"
-# 
-# # /!\ This is a destructive operation /!\
-# # It does not seem possible to make an include in gtk3 config
-# # https://superuser.com/q/1370777/733026
-# - name: Load GTK3 configuration via .config/gtk-3.0/settings.ini
-#   file:
-#     dest:   "{{ ansible_user_dir }}/.config/gtk-3.0/settings.ini"
-#     src:    "{{ remote_directory }}/files/gtk-3.0-settings.ini"
-#     state:  link
-#     force:  true
-# 
-# # NB : Qt5 theme is loaded through QT_STYLE_OVERRIDE env variable
-# - name: Load Qt4 graphical configuration via .config/Trolltech.conf
-#   blockinfile:
-#     dest:   "{{ ansible_user_dir }}/.config/Trolltech.conf"
-#     create: true
-#     marker: "# {mark} GLOBALRC ANSIBLE MANAGED BLOCK"
-#     block:  |
-#       # Set Qt4 Theme
-#       [Qt]
-#       style=Adwaita-Dark
-
-- name: Create ~/.config/environment.d
-  file:
-    path: "{{ ansible_user_dir }}/.config/environment.d"
-    state: directory
-
-- name: Load graphical session environment variables
-  file:
-    dest:   "{{ ansible_user_dir }}/.config/environment.d/globalrc.conf"
-    src:    "{{ remote_directory }}/files/environment"
-    state:  link
-
-### sway ###
-
-- name: Create sway config directory
-  file:
-    state:  directory
-    dest:   "{{ ansible_user_dir }}/.config/sway"
-
-- name: Create sway config file
-  template:
-    src:    "sway_config"
-    dest:   "{{ ansible_user_dir }}/.config/sway/config"
-  notify: Reload sway config
-  tags: sway-config
-
-- name: Install rofimoji
-  pip:
-    name: git+https://github.com/fdw/rofimoji
-  become: true
-  when: have_root and ( ansible_os_family == "Debian")
 
 - name: Create systemd user units directory
   file:
@@ -406,86 +172,9 @@
     scope:    user
     daemon_reload: true
 
-- name: Create waybar config directory
-  file:
-    state:  directory
-    dest:   "{{ ansible_user_dir }}/.config/waybar"
 
-- name: Symlink waybar config
-  file:
-    state:  link
-    src:    "{{ remote_directory }}/files/waybar_config"
-    dest:   "{{ ansible_user_dir }}/.config/waybar/config"
-
-- name: Create kanshi config directory
-  file:
-    state:  directory
-    dest:   "{{ ansible_user_dir }}/.config/kanshi"
-
-- name: Create kanshi config file
-  copy:
-    content:  "{{ kanshi_config }}"
-    dest:     "{{ remote_directory }}/kanshi_config"
-  notify: Reload kanshi config
-  tags: sway-config
-
-- name: Symlink kanshi config
-  file:
-    state:  link
-    src:    "{{ remote_directory }}/kanshi_config"
-    dest:   "{{ ansible_user_dir }}/.config/kanshi/config"
-
-- name: Download mediaplayer.py script
-  get_url:
-    url:  "https://raw.githubusercontent.com/Alexays/Waybar/master/resources/custom_modules/mediaplayer.py"
-    dest: "{{ remote_directory }}/mediaplayer.py"
-    mode: 0700
-  tags: online
-
-  # NB : Removing elements from the list won't remove the corresponding scripts
-- name: Install wrapper scripts for electron-based apps
-  template:
-    src:  "electron_wayland_wrapper.sh"
-    dest: "/usr/local/bin/{{ item }}"
-    mode: 0755
-  become: true
-  when: have_root | bool
-  loop: "{{ electron_wayland_to_wrap }}"
-
-# Explicitly configure sway-specific concrete portal implementations
-# NB : We're only specifying those for sway, this should not affect any other DE
-- name: Create ~/.config/xdg-desktop-portal
-  file:
-    path: "{{ ansible_user_dir }}/.config/xdg-desktop-portal"
-    state: directory
-- name: Configure xdg-desktop-portal to use darkman
-  blockinfile:
-    path: "{{ ansible_user_dir }}/.config/xdg-desktop-portal/sway-portals.conf"
-    marker: "# {mark} GLOBALRC ANSIBLE MANAGED BLOCK"
-    create: true
-    block: |
-      [preferred]
-      # Use darkman for light/dark theme toggle
-      # cf :
-      # * https://gitlab.com/WhyNotHugo/darkman/-/issues/60
-      # * man portals.conf
-      org.freedesktop.impl.portal.Settings=darkman
-
-      # If no explicit support is configured anywhere, try wlr first, then gtk
-      # https://github.com/emersion/xdg-desktop-portal-wlr/issues/42#issuecomment-1802357796
-      default=wlr;gtk
-  notify: Restart xdg-desktop-portal
 
 ### Firefox ###
-
-- name: Create /usr/local/bin/firefox
-  copy:
-    src:    "firefox"
-    dest:   "/usr/local/bin/firefox"
-    mode: 0755
-  become: true
-  when: have_root | bool
-
   # So, firefox has this notion of "profiles", which are basically independent config/data storages :
   # https://support.mozilla.org/en-US/kb/profiles-where-firefox-stores-user-data
   # Profile directory names are made of two elements :
@@ -518,6 +207,7 @@
     that: firefox_profile_path['files'][0]['path'] is defined
     msg:  "Could not find a firefox profile directory for name {{ firefox_profile_name }}"
 
+# RELEASE_BLOCKER could be ported to also work on macos
 - name: Setup firefox user config
   blockinfile:
     path: "{{ firefox_profile_path['files'][0]['path'] }}/user.js"
@@ -538,17 +228,6 @@
 
       // Docs (unofficial) about any specific setting : https://kb.mozillazine.org/
 
-      // Old sharing indicator in a popup window
-      // Not really useful anymore (info present in address bar) and behaves poorly on sway
-      // https://bugzilla.mozilla.org/show_bug.cgi?id=1628431
-      user_pref("privacy.webrtc.legacyGlobalIndicator", false);
-
-      // Always ask where to save downloaded files
-      user_pref("browser.download.useDownloadDir", false);
-
-      // Only show the bookmarks toolbar on a new tab, not all the time
-      user_pref("browser.toolbars.bookmarks.visibility", "newtab");
-
       // Disable built-in password manager
       user_pref("signon.rememberSignons", false);                       // Offer to save user-provided passwords
       user_pref("signon.autofillForms", false);                         // Auto-fill already saved passwords
@@ -561,98 +240,5 @@
       user_pref("privacy.globalprivacycontrol.enabled", true);
       user_pref("privacy.globalprivacycontrol.was_ever_enabled", true);
 
-      // At startup, reopen tabs that were open when firefox was closed
-
       // NEVER open anything in a new window, use a new tab instead
       user_pref("browser.link.open_newwindow", 3);              // Use tabs instead of windows for normal navigation
-      user_pref("browser.link.open_newwindow.restriction", 0);  // ... and even for windows meant to be pop-ups
-
-
-### VSCodium ###
-
-# https://vscodium.com/#install-on-fedora-rhel-centos-rockylinux-opensuse-rpm-package
-- name: Add vscodium rpm repo
-  ansible.builtin.yum_repository:
-    name: gitlab.com_paulcarroty_vscodium_repo
-    file: vscodium
-    description: download.vscodium.com
-    baseurl: "https://download.vscodium.com/rpms/"
-    enabled: yes
-    gpgcheck: yes
-    repo_gpgcheck: yes
-    gpgkey: "https://gitlab.com/paulcarroty/vscodium-deb-rpm-repo/-/raw/master/pub.gpg"
-    metadata_expire: 1h
-  become: true
-  when: have_root and ansible_os_family == "RedHat"
-
-- name: Install vscodium
-  dnf:
-    name: codium
-    state: present
-  become: true
-  when: have_root and ansible_os_family == "RedHat"
-
-
-# cf https://code.visualstudio.com/docs/getstarted/settings#_settingsjson
-
-- name: Ensure vscodium config directory exists
-  ansible.builtin.file:
-    path: "{{ ansible_user_dir }}/.config/VSCodium/User/"
-    state: directory
-  tags: vscodium
-
-# This command is perfectly idempotent, and doesn't update already installed extensions
-# It's possible to force updates, or pin versions, we don't currently do it
-# NB : for vscodium, extensions are downloaded from https://open-vsx.org/, not the Microsoft store
-# This means some extensions may be absent, or not the exact same version
-# Details : https://github.com/VSCodium/vscodium/issues/448
-# Procedure to make an extension available on open-vsx : https://github.com/VSCodium/vscodium/blob/master/DOCS.md#extensions-marketplace
-# Manually install an extension from the marketplace : https://milicendev.netlify.app/article/install-vs-codium-and-integrate-vs-code-extensions/
-- name: Install VSCodium managed extensions
-  ansible.builtin.command:
-    argv:
-      - codium
-      - --install-extension
-      - "{{ item }}"
-  register: local_output
-  changed_when: "'is already installed' not in local_output.stdout"
-  loop:
-    - asvetliakov.vscode-neovim   # neovim install
-    - oderwat.indent-rainbow      # more readable indent
-    - editorconfig.editorconfig   # read repo-local .editorconfig
-    - eamodio.gitlens             # nice git blame integration
-    - redhat.vscode-yaml          # yaml
-    - hashicorp.terraform         # terraform formatting/auto-completion
-    # python
-    - ms-python.python
-    # - ms-python.black
-  tags: vscodium
-
-# NB : VSCodium watches and reloads the file automatically, but not when it's a symlink
-- name: Configure vscodium user config file
-  ansible.builtin.template:
-    src:    templates/vscodium_user_settings.jsonc
-    dest:   "{{ ansible_user_dir }}/.config/VSCodium/User/settings.json"
-  tags: vscodium
-
-
-### darkman ###
-
-- name: Create ~/.config/darkman
-  file:
-    path: "{{ ansible_user_dir }}/.config/darkman"
-    state: directory
-
-  # NB : we currently don't bother reloading darkman on config change
-- name: Setup darkman config
-  blockinfile:
-    path: "{{ ansible_user_dir }}/.config/darkman/config.yaml"
-    marker: "# {mark} GLOBALRC ANSIBLE MANAGED BLOCK"
-    create: true
-    block: |
-      # By default, darkman will attempt to look up coordinates, and crash without geoclue
-      # v2.0 should change this default behavior.
-      # The way to entirely disable automatic transitions is to disable geoclue without explicitly setting
-      # coordinates (which is what we want here)
-      # cf https://gitlab.com/WhyNotHugo/darkman/-/issues/52
-      usegeoclue: false

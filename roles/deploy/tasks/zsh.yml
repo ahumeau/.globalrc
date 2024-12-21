@@ -12,16 +12,15 @@
     version:  "{{ item.version }}"
     depth:    1
   tags: online
-  with_items:
-    - name:     powerlevel10k
-      repo:     https://github.com/romkatv/powerlevel10k
-      version:  v1.17.0
 
+  # RELEASE_BLOCKER check the plugins I use with zprezto
+
+  with_items:
       # TODO : There are packages, see if they're updated enough, and how to use them
     - name:     zsh-autosuggestions
       # repo:     https://github.com/zsh-users/zsh-autosuggestions
       # version:  v0.7.0
-      # Switch to my fork for now : https://github.com/zsh-users/zsh-autosuggestions/pull/749
+      # Switch to toadjaune's fork for now : https://github.com/zsh-users/zsh-autosuggestions/pull/749
       repo:     https://github.com/toadjaune/zsh-autosuggestions
       version:  wrap-underscore-widgets
 
@@ -59,11 +58,10 @@
       - "{{ userspace_bin_path_cargo }}/atuin"
       - init
       - zsh
-      - --disable-up-arrow
-      - --disable-ctrl-r
   changed_when: false
   register: atuin_init_zsh
 
+# RELEASE_BLOCKER see if we really want that
 # Some specific tasks need to be done before loading .zshrc
 # https://unix.stackexchange.com/questions/71253/what-should-shouldnt-go-in-zshenv-zshrc-zlogin-zprofile-zlogout#71258
 # http://zsh.sourceforge.net/Intro/intro_3.html

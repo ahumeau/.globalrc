@@ -10,52 +10,14 @@ userspace_bin_path_go:    "{{ ansible_user_dir }}/go/bin"     # default value
 have_root:  false
 
 # Set this to true if the machine has a graphical interface (X server, etc…). It skips useless steps.
-desktop_linux: false
-
-# add a custom wrapper in /usr/local/bin/ to start electron programs through native wayland
-# NB : There is no check that the corresponding program is actually installed, so we may
-# create a script showing up in PATH but doomed to fail
-electron_wayland_to_wrap: []
-  # - slack     # switched to flatpak
-  # - spotify   # switched to flatpak
-  # - Discord   # switched to flatpak
-
-# Movement keys
-# Right hand
-key_rh_left:  'h'
-key_rh_down:  'j'
-key_rh_up:    'k'
-key_rh_right: 'l'
-
-# Tmux configuration
-tmux_status_bar_colour: 'colour2'
-tmux_status_bar_inactive_colour: 'colour25'
+# RELEASE_BLOCKER switch to just desktop (and then include macos) or remove completely
+desktop_linux: true
 
 # SSH Agent
 ssh_agent_symlink_path: '/tmp/ssh-auth-sock-$UID'
 
 # keyboard layout
 keyboard_layout: 'fr'
-keyboard_variant: 'lafayette'
-
-# Extra ssh config to be prepended to the global config
-extra_ssh_config_host: ""
-extra_ssh_config_global: ""
-
-# Sway setup
-# sway_output_primary: "" # Mandatory for graphical setup
-sway_output_custom_1: "nop 'Mode not defined'"
-sway_output_custom_2: "nop 'Mode not defined'"
-kanshi_config: |
-  profile "kanshi not configured" {
-    output "invalid output name" enable position 0,0
-  }
-
-# Those paths are relative to user home
-# Those files have to be created locally by hand.
-# The globbing is here to tolerate for various file extensions, unsure what happens if several files match.
-sway_wallpaper_path:  ".config/sway/wallpaper.*"
-sway_lockscreen_path: ".config/sway/lockscreen.*"
 
 # On both OS, we can just dump ttf files in a directory, only the path changes
 fonts_install_path: "{{ ansible_user_dir }}/{{ (ansible_system == 'Darwin') | ternary ('Library/Fonts', '.local/share/fonts') }}/globalrc_fonts"
@@ -63,3 +25,4 @@ fonts_install_path: "{{ ansible_user_dir }}/{{ (ansible_system == 'Darwin') | te
 # Firefox default profile
 firefox_profile_name: default-release
 
+# RELEASE_BLOCKER support azerty/qwerty
