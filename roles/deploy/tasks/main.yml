@@ -47,7 +47,6 @@
     - bazshrc.sh
     - inputrc
     - ssh_config
-    - sshrc
 
 - name: Create the local_bin directory
   file:
@@ -82,7 +81,7 @@
 
 - name: Install desktop-specific stuff (linux)
   import_tasks: desktop_linux.yml
-  when: desktop_linux | bool
+  when: ansible_system != "Darwin" and desktop_linux | bool
   tags: desktop
 
 - name: Install desktop-specific stuff (Mac)
@@ -97,3 +96,19 @@
 - name: Install ssh configuration
   import_tasks: ssh.yml
   tags: ssh
+
+# RELEASE_BLOCKER move to own file?
+- name: Install global gitignore
+  file:
+    state: link
+    follow: false
+    src: "{{ remote_directory }}/files/gitignore"
+    dest: "{{ ansible_user_dir }}/.gitignore"
+
+- name: Install gitconfig
+  file:
+    state: link
+    follow: false
+    src: "{{ remote_directory }}/files/gitconfig"
+    dest: "{{ ansible_user_dir }}/.gitconfig"
+

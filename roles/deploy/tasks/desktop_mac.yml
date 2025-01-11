@@ -40,5 +40,20 @@
     name:
       - md5sha1sum  # for command md5sum
       - eza
+      - starship
+      - git
+      - git-delta
+      - atuin
+      - emacs
+      - uv
 
+    state: present
+
+
+- name: Setup Finder to display hidden files
+  community.general.osx_defaults:
+    domain: com.apple.finder
+    key: AppleShowAllFiles
+    type: bool
+    value: true
     state: present

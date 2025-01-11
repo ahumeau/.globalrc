@@ -4,29 +4,7 @@
 # Might as well configure it explicitly
 all:
   hosts:
-
-    # RELEASE_BLOCKER
-    # Fedora
-    valoo:
-      expected_hostname: valoo
+    127.0.0.1:
       ansible_connection: local
-      desktop_linux: true
 
-    # Fedora
-    spacerig:
-      expected_hostname: spacerig
-      ansible_connection: local
-      desktop_linux: true
-
-    # Fedora
-    launchpad:
-      expected_hostname: launchpad
-      ansible_connection: local
-      desktop_linux: true
-
-    # Fedora
-    houston:
-      expected_hostname: houston
-      ansible_connection: local
-      desktop_linux: true
 

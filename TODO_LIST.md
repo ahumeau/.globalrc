@@ -37,10 +37,6 @@ Power management : tlp
 * Install required libs solokeys
 
 
-# RELEASE_BLOCKER starship
-# RELEASE_BLOCKER gitconfig
 # RELEASE_BLOCKER terminator conf
-# RELEASE_BLOCKER git aliased to g (with completion)
 # RELEASE_BLOCKER Ubuntu custom keyboard setup
-# RELEASE_BLOCKER pretty git differ
 # RELEASE_BLOCKER ubuntu : status bar extensions

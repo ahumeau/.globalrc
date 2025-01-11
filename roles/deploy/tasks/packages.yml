@@ -29,3 +29,4 @@
       - atuin
     state: present
     version: "18.2.0"
+  when: ansible_system != "Darwin"  # Installed with brew on macOS

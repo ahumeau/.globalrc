@@ -68,6 +68,7 @@ export SSH_AUTH_SOCK="${XDG_RUNTIME_DIR}/ssh-agent.socket"
 
 ### Begin aliases & alias functions ###
 
+# RELEASE_BLOCKER move aliases to a dedicated file
 # add coloring
 alias grep='grep --color=auto'
 
@@ -81,6 +82,10 @@ alias cdtmp='pushd $(mktemp -d)'
 
 # Way too long commands
 alias tf="terraform" # RELEASE_BLOCKER autocomplete?
-# RELEASE_BLOCKER my aliases
 
+alias g=git
+compdef g=git  # g gets the same completion as git
+
+alias ls=eza
+alias ll='eza -albF --git'
 ### End aliases & alias functions ###
