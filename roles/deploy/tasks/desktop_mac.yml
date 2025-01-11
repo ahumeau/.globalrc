@@ -49,11 +49,11 @@
 
     state: present
 
-
-- name: Setup Finder to display hidden files
-  community.general.osx_defaults:
-    domain: com.apple.finder
-    key: AppleShowAllFiles
-    type: bool
-    value: true
-    state: present
+# RELEASE_BLOCKER does not seem to work
+#- name: Setup Finder to display hidden files
+#  community.general.osx_defaults:
+#    domain: com.apple.finder
+#    key: AppleShowAllFiles
+#    type: string
+#    value: "YES"
+#    state: present
