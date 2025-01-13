@@ -46,6 +46,7 @@
       - atuin
       - emacs
       - uv
+      - ripgrep
 
     state: present
 
