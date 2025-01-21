@@ -60,4 +60,5 @@ Install ansible `pipx install --include-deps ansible`
     - Cursor: c7c7c7
     - Bold: ffffff
 - iTerm2 settings > Profile > Advanced : set Semantic History to Run Command and set value to `/Applications/PyCharm.app/Contents/MacOS/pycharm --line \2 \1`
+- iTerm2 settings > Profile > Keys > Key Mapping : Import preset > import files/antoine.itermkeymap
 - System settings > Privacy and Security > Allow applications downloaded from anywhere
