@@ -61,4 +61,5 @@ Install ansible `pipx install --include-deps ansible`
     - Bold: ffffff
 - iTerm2 settings > Profile > Advanced : set Semantic History to Run Command and set value to `/Applications/PyCharm.app/Contents/MacOS/pycharm --line \2 \1`
 - iTerm2 settings > Profile > Keys > Key Mapping : Import preset > import files/antoine.itermkeymap
+- System settings > Keyboard > Keyboard Shortcuts > Mission Control > uncheck "Mission Control > Move left/right a space" to free up the ctrl+left/right arrow shortcuts
 - System settings > Privacy and Security > Allow applications downloaded from anywhere
