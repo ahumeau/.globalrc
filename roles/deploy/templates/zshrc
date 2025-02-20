@@ -268,3 +268,7 @@ complete -C '/usr/local/bin/aws_completer' aws
 
 # Comes back into previous directory
 popd > /dev/null
+
+
+# g gets the same completion as git (alias defined in bazshrc))
+compdef g=git

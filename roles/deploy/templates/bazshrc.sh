@@ -84,7 +84,6 @@ alias cdtmp='pushd $(mktemp -d)'
 alias tf="terraform" # RELEASE_BLOCKER autocomplete?
 
 alias g=git
-compdef g=git  # g gets the same completion as git
 
 alias ls=eza
 alias ll='eza -albF --git'
