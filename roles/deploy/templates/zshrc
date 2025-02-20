@@ -238,6 +238,9 @@ ZSH_AUTOSUGGEST_MANUAL_REBIND=1
 
 ### Start key mappings ###
 
+# emacs bindings
+bindkey -e
+
 # History backwards search (supports globbing)
 # TODO : probably made obsolete by atuin
 # bindkey '^[g' history-incremental-pattern-search-backward
